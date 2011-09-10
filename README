@@ -1,0 +1,57 @@
+
+If you are like me and had the sad experience of purchasing an lpcxpresso
+board (I highly discourage this, buy an mbed instead), I finally salvaged
+mine.  The problem is, or at least was, you could only use this card
+using a particular windows IDE/sandbox.  Perhaps there is a way to
+program it from linux without whatever toolchain you like, but I have
+not bothered to look for that anymore.  The lpc 1343 supports both a
+usb and uart based ISP (in-system programming) way into the chip.  I
+have used UART based before so that is the path I took.
+
+Some soldering or at least wiring is involved here...
+
+I took one of these ftdi breakout boards.
+
+http://www.sparkfun.com/products/718
+
+I cut all the traces between the lpc-link board and the target board,
+no connections at all.  If you can/want cut the board and remove the
+lpc-link and discard it.  You can always restore those connections
+if you want to use the lpc-link again some day (some wire and/or solder
+is required of course).  All connections from here on refer to the target
+board.
+
+Connect 3.3v on the ftdi board to 3.3v on the target board.
+Connect RX-I on the ftdi board to TXD on the target board.
+Connect TX-O on the ftdi board to RXD on the target board.
+Connect GND on the ftdi board to GND on the target board.
+
+On the target board you are going to need to be able to short p0.1 and
+p0.3 to ground when powering on the board (or hitting reset if you add
+a reset).  I used the prototype area for this with a removeable jumper.
+
+With the jumper on, the two ISP boot pins shorted to zero, when powering
+on the board by plugging usb into the ftdi board, tells the lpc1343 to
+go into UART based ISP (In-System Programming) boot mode.
+
+If you have followed any of my code you know how I do things.  The
+proglpc directory is derived from the one in armmite_samples but hand
+tuned for the ISP bootloader that I found on this chip.  armmite_samples
+experienced version 2.1 in an lpc2103 and this lpc1343 I found version
+2.5.  I have no interest in a one size fits all programmer, download
+flash_magic or something like it if that is what you are after.  Or
+you are welcome to take this code to understand how the ISP works, and
+make a tool for everyone.  I dont know enough about LPC to know if
+they always put the same version of bootloader in a flavor of chip
+forever, or keep all families up to date.  Ignoring/skipping 0x0A
+characters is probably the easiest way to resolve the differences I found,
+you also have to support different crystal frequencies and ram addresses
+depending on the board/device.
+
+The mbed_samples repo goes into greater detail about using the gnu and
+llvm tools for developing for a cortex-m microcontroller.  The
+available memory on both boards starts at 0x10000000, but remember that
+the GPIO ports and other registers do not necessarily use the same
+address so take the mbed_samples as a reference, and apply them to the
+lpc1343 until such time as I catch up with this repo.
+
